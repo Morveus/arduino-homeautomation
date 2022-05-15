@@ -30,8 +30,11 @@
 #include <WiFiNINA.h>
 
 // constants won't change. Used here to set a pin number:
+const int gate = 10;
+const int poolLights = 11;
 const int blindOpen = 12;
 const int blindClose = 13;
+
 
 char ssid[] = "";             //  your network SSID (name) between the " "
 char pass[] = "";      // your network password between the " "
@@ -49,9 +52,13 @@ int closeDuration = 105000; // 1 minute and 45 seconds (=105 sec)
 
 
 void setup() {
+  pinMode(gate, OUTPUT);
+  pinMode(poolLights, OUTPUT);
   pinMode(blindOpen, OUTPUT);
   pinMode(blindClose, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(gate, LOW);
+  digitalWrite(poolLights, LOW);
   digitalWrite(blindOpen, LOW);
   digitalWrite(blindClose, LOW);
   
@@ -64,10 +71,14 @@ void setup() {
 
   server.begin();
   printWifiStatus();
-  
+
+  pinMode(gate, OUTPUT);
+  pinMode(poolLights, OUTPUT);
   pinMode(blindOpen, OUTPUT);
   pinMode(blindClose, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(gate, LOW);
+  digitalWrite(poolLights, LOW);
   digitalWrite(blindOpen, LOW);
   digitalWrite(blindClose, LOW);
 }
@@ -220,17 +231,28 @@ void printWEB() {
         }
 
         // ACTIONNEMENT PORTAIL
-        // On rebascule les relais en position ouverte
+        // On clique un coup sur la télécommande et on relâche
         if (currentLine.endsWith("GET /portail")) {
           Serial.println("Commande portail");
           lastOpened = 0;
           lastClosed = 0;
-          digitalWrite(blindOpen, LOW);
-          digitalWrite(blindClose, LOW);
+          digitalWrite(gate, HIGH);
+          delay(75);
+          digitalWrite(gate, LOW);
           Serial.println("La télécommande du portail a été actionnée");
         }
 
-        
+        // ACTIONNEMENT LUMIERES PISCINE
+        // On clique un coup sur la télécommande et on relâche
+        if (currentLine.endsWith("GET /lumierepiscine")) {
+          Serial.println("Commande lumières piscine");
+          lastOpened = 0;
+          lastClosed = 0;
+          digitalWrite(poolLights, HIGH);
+          delay(75);
+          digitalWrite(poolLights, LOW);
+          Serial.println("La télécommande d'éclairage de la piscine a été actionnée");
+        }
       }
     }
     // close the connection:
